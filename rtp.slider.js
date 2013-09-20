@@ -587,7 +587,9 @@ RTP.Multievent = function (cb)
 				panel : '.' + this.conf.klass.panel,
 				wrapper: '.' + this.conf.klass.wrapper,
 				viewport : '.' + this.conf.klass.viewport,
-				container : '.' + this.conf.klass.container
+				container : '.' + this.conf.klass.container,
+				// http://jsperf.com/jquery-scrollable (experimental)
+				scrollable : jQuery.expr[':'].scrollable ? ':scrollable' : ''
 			}
 
 		});
@@ -4670,7 +4672,35 @@ data.vp_off = vp_off.x;
 	var evt_stop = 'mouseup';
 	var evt_move = 'mousemove';
 	var evt_start = 'mousedown';
+	var evt_scroll = 'scroll';
 	// var evt_abort = 'dragstart';
+
+
+	// @@@ private fn: scroll_handler @@@
+	var scroll_handler = function (data, evt)
+	{
+
+		// return without aborting the event
+		if (!this.conf.mouseSwipe) return true;
+
+		// unbind my event handlers when done
+		// jQuery(document).unbind(evt_abort, data.abort);
+		jQuery(document).unbind(evt_move, data.move);
+		jQuery(document).unbind(evt_stop, data.end);
+
+		// reset to avoid memory leak (play safe)
+		data.end = data.move = data.start = null;
+
+		// normalize drag/scroll variable
+		var vertical = this.conf.vertical,
+		    swipe = vertical ? data.swipeY : data.swipeX,
+		    scroll = vertical ? data.swipeX : data.swipeY;
+
+		// call swipe start handler with coordinates
+		this.trigger('swipeStop', swipe, scroll, data);
+
+	};
+	// @@@ EO private fn: scroll_handler @@@
 
 
 	// @@@ private fn: start_handler @@@
@@ -4764,6 +4794,11 @@ data.vp_off = vp_off.x;
 		// capture the drag start event to disable other
 		// handlers when the mouse is dragged afterwards
 		this.viewport.bind(evt_start, jQuery.proxy(start_handler, this, data));
+
+		// capture the scroll events of inner elements
+		// prevents the swipe action (more tests needed)
+		this.viewport.find(this.conf.selector.scrollable)
+		.bind(evt_scroll, jQuery.proxy(scroll_handler, this, data));
 
 	});
 	// @@@ EO plugin: ready @@@
@@ -5550,6 +5585,50 @@ data.vp_off = vp_off.x;
 	}
 
 })(jQuery);
+
+// http://jsperf.com/jquery-scrollable
+(function()
+{
+
+	jQuery.extend(jQuery.expr[":"],
+	{
+
+		'scrollable': function(element)
+		{
+
+			var vertically_scrollable, horizontally_scrollable;
+
+			if
+			(
+				jQuery(element).css('overflow') == 'scroll' ||
+				jQuery(element).css('overflowX') == 'scroll' ||
+				jQuery(element).css('overflowY') == 'scroll'
+			)
+			{
+				return true;
+			}
+
+			vertically_scrollable = (element.clientHeight < element.scrollHeight) &&
+			(
+				jQuery.inArray(jQuery(element).css('overflowY'), ['scroll', 'auto']) != -1 ||
+				jQuery.inArray(jQuery(element).css('overflow'), ['scroll', 'auto']) != -1
+			);
+
+			if (vertically_scrollable) return true;
+
+			horizontally_scrollable = (element.clientWidth < element.scrollWidth) &&
+			(
+				jQuery.inArray(jQuery(element).css('overflowX'), ['scroll', 'auto']) != -1 ||
+				jQuery.inArray(jQuery(element).css('overflow'), ['scroll', 'auto']) != -1
+			);
+
+			return horizontally_scrollable;
+		}
+
+	});
+
+})();
+
 /*
   Copyright (c) Marcel Greter 2013 - ocbnet.ch - RTP jQuery Slider Tiles plugin
   This is free software; you can redistribute it and/or modify it under the terms

@@ -131,7 +131,9 @@
 				panel : '.' + this.conf.klass.panel,
 				wrapper: '.' + this.conf.klass.wrapper,
 				viewport : '.' + this.conf.klass.viewport,
-				container : '.' + this.conf.klass.container
+				container : '.' + this.conf.klass.container,
+				// http://jsperf.com/jquery-scrollable (experimental)
+				scrollable : jQuery.expr[':'].scrollable ? ':scrollable' : ''
 			}
 
 		});

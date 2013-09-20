@@ -46,7 +46,35 @@
 	var evt_stop = 'mouseup';
 	var evt_move = 'mousemove';
 	var evt_start = 'mousedown';
+	var evt_scroll = 'scroll';
 	// var evt_abort = 'dragstart';
+
+
+	// @@@ private fn: scroll_handler @@@
+	var scroll_handler = function (data, evt)
+	{
+
+		// return without aborting the event
+		if (!this.conf.mouseSwipe) return true;
+
+		// unbind my event handlers when done
+		// jQuery(document).unbind(evt_abort, data.abort);
+		jQuery(document).unbind(evt_move, data.move);
+		jQuery(document).unbind(evt_stop, data.end);
+
+		// reset to avoid memory leak (play safe)
+		data.end = data.move = data.start = null;
+
+		// normalize drag/scroll variable
+		var vertical = this.conf.vertical,
+		    swipe = vertical ? data.swipeY : data.swipeX,
+		    scroll = vertical ? data.swipeX : data.swipeY;
+
+		// call swipe start handler with coordinates
+		this.trigger('swipeStop', swipe, scroll, data);
+
+	};
+	// @@@ EO private fn: scroll_handler @@@
 
 
 	// @@@ private fn: start_handler @@@
@@ -140,6 +168,11 @@
 		// capture the drag start event to disable other
 		// handlers when the mouse is dragged afterwards
 		this.viewport.bind(evt_start, jQuery.proxy(start_handler, this, data));
+
+		// capture the scroll events of inner elements
+		// prevents the swipe action (more tests needed)
+		this.viewport.find(this.conf.selector.scrollable)
+		.bind(evt_scroll, jQuery.proxy(scroll_handler, this, data));
 
 	});
 	// @@@ EO plugin: ready @@@
