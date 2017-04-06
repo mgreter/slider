@@ -111,7 +111,8 @@
 			keep: keep,
 			action: action,
 			easing: easing || this.conf.easeFunction,
-			duration: isNaN(duration) ? this.conf.easeDuration : duration,
+			duration: duration == null || isNaN(duration)
+			          ? this.conf.easeDuration : duration,
 			step: function () { step.call(slider, this, arguments); },
 			complete: function ()
 			{

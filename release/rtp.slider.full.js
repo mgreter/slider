@@ -1457,10 +1457,13 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 (function (jQuery)
 {
 
-	// check for touch features
-	if ( ! ('ontouchstart' in window) ) return;
-	// proper detection for ie10 on desktop (https://github.com/CreateJS/EaselJS/issues/273)
-	if ( window.navigator['msPointerEnabled'] && window.navigator["msMaxTouchPoints"] > 0 ) return;
+	// abort if no touch API found or if pointer API is available
+	if ( ! ('ontouchstart' in window) || (window['PointerEvent'])
+		// proper detection for ie10+ on desktop (https://github.com/CreateJS/EaselJS/issues/273)
+		// this will also be true for ie11 and hopefully for all future IE generations (I dare you MS)
+		|| (window.navigator['msPointerEnabled'] || window.navigator["msMaxTouchPoints"]) //ie10
+		|| (window.navigator['pointerEnabled'] || window.navigator["maxTouchPoints"]) //ie11
+	) return;
 
 	// extend class
 	(function(prototype)
@@ -4248,7 +4251,8 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 			keep: keep,
 			action: action,
 			easing: easing || this.conf.easeFunction,
-			duration: isNaN(duration) ? this.conf.easeDuration : duration,
+			duration: duration == null || isNaN(duration)
+			          ? this.conf.easeDuration : duration,
 			step: function () { step.call(slider, this, arguments); },
 			complete: function ()
 			{
@@ -5189,7 +5193,7 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 		var class_visible = this.klass.panelVisible;
 
 		// panel if completely visible
-		if (progress >= 1)
+		if (progress > 0.999)
 		{
 			this.navDot.eq(slide)
 				.addClass(class_visible)
@@ -5197,7 +5201,7 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 				.removeClass(class_partial)
 		}
 		// panel is not shown at all
-		else if (progress <= 0)
+		else if (progress < 0.001)
 		{
 			this.navDot.eq(slide)
 				.addClass(class_hidden)
@@ -6131,6 +6135,9 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 	prototype.plugin('swipeMove', function(x, y, data)
 	{
 
+		// check for any movement
+		if (x == 0 && y == 0) return;
+
 		// check if feature is enabled
 		if (!this.conf.panelInfoBox) return;
 
@@ -6475,6 +6482,9 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 
 		// get absolute speed
 		var speed = Math.abs(m);
+
+		// check for valid movement
+		if (x == 0 && y == 0) speed = 0;
 
 		// direction of the movement
 		var direction = m < 0 ? - 1 : 1;

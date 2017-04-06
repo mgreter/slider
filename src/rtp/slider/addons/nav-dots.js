@@ -40,7 +40,7 @@
 		var class_visible = this.klass.panelVisible;
 
 		// panel if completely visible
-		if (progress >= 1)
+		if (progress > 0.999)
 		{
 			this.navDot.eq(slide)
 				.addClass(class_visible)
@@ -48,7 +48,7 @@
 				.removeClass(class_partial)
 		}
 		// panel is not shown at all
-		else if (progress <= 0)
+		else if (progress < 0.001)
 		{
 			this.navDot.eq(slide)
 				.addClass(class_hidden)

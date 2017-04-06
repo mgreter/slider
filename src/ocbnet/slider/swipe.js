@@ -282,6 +282,9 @@
 		// get absolute speed
 		var speed = Math.abs(m);
 
+		// check for valid movement
+		if (x == 0 && y == 0) speed = 0;
+
 		// direction of the movement
 		var direction = m < 0 ? - 1 : 1;
 

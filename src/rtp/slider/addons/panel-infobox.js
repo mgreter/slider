@@ -94,6 +94,9 @@
 	prototype.plugin('swipeMove', function(x, y, data)
 	{
 
+		// check for any movement
+		if (x == 0 && y == 0) return;
+
 		// check if feature is enabled
 		if (!this.conf.panelInfoBox) return;
 
