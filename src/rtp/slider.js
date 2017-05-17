@@ -169,6 +169,9 @@
 		// get all intial panels (slides) once at startup (after config)
 		var slides = slider.slides = container.find('>.' + klass.panel);
 
+		// assertion if no slides found
+		if (slides.length == 0) return;
+
 		// don't init further if there is only a single slide
 		if (conf.dontInitSingle && slides.length < 2) return;
 
