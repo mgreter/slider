@@ -6065,7 +6065,7 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 		if (this.queue.length > 0) return;
 
 		// restart autoslider with the default deay
-		this.startAutoSlide(this.conf.autoslideDelay);
+		this.startAutoSlide(this.autoslideDelay());
 
 	});
 	// @@@ EO plugin: stopAnimation @@@
@@ -6088,7 +6088,7 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 
 		if (this.queue.length > 0 || this.animating || this.locked) return;
 
-		// stop the autoslide if end is reached (either on the begining or the end)
+		// stop the autoslide if end is reached (either on the beginning or the end)
 		if (!this.conf.carousel && ((this.position <= this.smin && action < 0) || (this.position >= this.smax && action > 0)))
 		{ return this.stopAutoSlide(); }
 
@@ -6150,6 +6150,17 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 	}
 	// @@@ EO method: stopAutoSlide @@@
 
+	// @@@ method: autoslideDelay @@@
+	prototype.autoslideDelay = function ()
+	{
+
+		// get all panels for the current slide
+		var panels = this.getPanelsBySlide(this.position);
+		// return value from panel data attribute or use global value
+		return panels.data('autoslide-delay') || this.conf.autoslideDelay;
+
+	}
+	// @@@ EO method: autoslideDelay @@@
 
 	// @@@ control autoslider [on/off, first timeout, action] @@@
 	// prototype.autoslide = function ()
@@ -6171,7 +6182,7 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 
 		// maybe use special timeout for first auto slide
 		var timeout = isNaN(this.conf.autoslideFirstDelay) ?
-		    this.conf.autoslideDelay : this.conf.autoslideFirstDelay;
+		    this.autoslideDelay() : this.conf.autoslideFirstDelay;
 
 		// call first autoslide with setting
 		this.startAutoSlide(timeout);
@@ -6214,7 +6225,7 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 
 				// maybe use special timeout for resume auto slide
 				var timeout = this.conf.autoslideResumeDelay != false ?
-				    this.conf.autoslideResumeDelay : this.conf.autoslideDelay;
+				    this.conf.autoslideResumeDelay : this.autoslideDelay();
 
 				// restart autoslide on mouse out with optional timeout
 				if(this.conf.autoslidePauseOnHover) this.startAutoSlide(timeout);
