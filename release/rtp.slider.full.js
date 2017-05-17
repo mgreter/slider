@@ -226,6 +226,9 @@ RTP.Multievent = function (cb)
 		for(var i = 0, l = widgets.length; i < l; i++)
 		{
 
+			// skip any disabled widgets
+			if (widgets[i].disabled) continue;
+
 			// call method in widget context
 			if (jQuery.isFunction(widgets[i][fn]))
 			{ widgets[i][fn].call(widgets[i], data); }
@@ -247,6 +250,9 @@ RTP.Multievent = function (cb)
 		// loop all widgets in order of registration
 		for(var i = 0, l = widgets.length; i < l; i++)
 		{
+
+			// skip any disabled widgets
+			if (widgets[i].disabled) continue;
 
 			// get childrens for widget from options
 			var children = widgets[i].layout.children;
@@ -276,6 +282,9 @@ RTP.Multievent = function (cb)
 		// loop all widgets in order of registration
 		for(var i = 0, l = widgets.length; i < l; i++)
 		{
+
+			// skip any disabled widgets
+			if (widgets[i].disabled) continue;
 
 			// get childrens for widget from options
 			var children = widgets[i].layout.children;
@@ -1991,6 +2000,9 @@ var decideScrollOrPanOnFirst = isChromium !== null && vendorName === "Google Inc
 
 		// get all intial panels (slides) once at startup (after config)
 		var slides = slider.slides = container.find('>.' + klass.panel);
+
+		// assertion if no slides found
+		if (slides.length == 0) return;
 
 		// don't init further if there is only a single slide
 		if (conf.dontInitSingle && slides.length < 2) return;
